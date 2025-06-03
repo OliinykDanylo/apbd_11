@@ -1,5 +1,5 @@
 # apbd_11
-# To run this application, you must provide an appsettings.json configuration file in the root of your project. The file should include the following sections:
+To run this application, you must provide an appsettings.json configuration file in the root of your project. The file should include the following sections:
 {
   "Logging": {
     "LogLevel": {
