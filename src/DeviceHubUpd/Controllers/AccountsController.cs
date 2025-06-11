@@ -59,8 +59,7 @@ public class AccountsController : ControllerBase
         var result = accounts.Select(a => new
         {
             a.Id,
-            a.UserName,
-            a.Password
+            a.UserName
         });
 
         return Ok(result);
@@ -75,8 +74,7 @@ public class AccountsController : ControllerBase
 
         return Ok(new
         {
-            account.UserName,
-            account.Password
+            account.UserName
         });
     }
 }
