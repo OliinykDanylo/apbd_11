@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DeviceHubUpd.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/accounts")]
 [Authorize(Roles = "Admin")]
 public class AccountsController : ControllerBase
 {

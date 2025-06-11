@@ -9,7 +9,7 @@ using RestAPI.DTO;
 namespace DeviceHubUpd.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/devices")]
 public class DevicesController : ControllerBase
 {
     private readonly DeviceHubUpdContext _context;
