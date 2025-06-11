@@ -13,9 +13,11 @@ namespace DeviceHubUpd.Controllers;
 public class DevicesController : ControllerBase
 {
     private readonly DeviceHubUpdContext _context;
+    private readonly ILogger<DevicesController> _logger;
 
-    public DevicesController(DeviceHubUpdContext context)
+    public DevicesController(DeviceHubUpdContext context, ILogger<DevicesController> logger)
     {
+        _logger = logger;
         _context = context;
     }
     
@@ -33,6 +35,7 @@ public class DevicesController : ControllerBase
         }
         catch(Exception ex)
         {
+            _logger.LogError(ex, "Error fetching devices");
             return StatusCode(500, ex.Message);
         }
         
@@ -81,22 +84,16 @@ public class DevicesController : ControllerBase
             var dto = new DeviceDetailDto
             {
                 Name = device.Name,
-                DeviceTypeName = device.DeviceType?.Name,
                 IsEnabled = device.IsEnabled,
                 AdditionalProperties = JsonSerializer.Deserialize<object>(device.AdditionalProperties),
-                CurrentEmployee = currentEmployeeRelation?.Employee != null
-                    ? new DeviceEmployeeDto
-                    {
-                        Id = currentEmployeeRelation.Employee.Id,
-                        FullName = $"{currentEmployeeRelation.Employee.Person.FirstName} {currentEmployeeRelation.Employee.Person.MiddleName} {currentEmployeeRelation.Employee.Person.LastName}"
-                    }
-                    : null
+                DeviceTypeName = device.DeviceType?.Name
             };
 
             return Ok(dto);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error fetching device details");
             return StatusCode(500, ex.Message);
         }
     }
@@ -107,8 +104,8 @@ public class DevicesController : ControllerBase
     {
         try
         {
-            var deviceType = await _context.DeviceTypes.FirstOrDefaultAsync(dt => dt.Name == dto.DeviceTypeName);
-            if (deviceType == null) return BadRequest("Invalid device type name.");
+            var deviceType = await _context.DeviceTypes.FirstOrDefaultAsync(dt => dt.Id == dto.TypeId);
+            if (deviceType == null) return BadRequest("Invalid device type id.");
 
             var device = new Device
             {
@@ -125,6 +122,7 @@ public class DevicesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error creating device");
             return StatusCode(500, ex.Message);
         }
     }
@@ -150,7 +148,6 @@ public class DevicesController : ControllerBase
                 if (userEmail == null)
                     return Forbid();
 
-                // Get the user's account
                 var account = await _context.Accounts
                     .FirstOrDefaultAsync(a => a.UserName == userEmail);
 
@@ -159,7 +156,6 @@ public class DevicesController : ControllerBase
 
                 var employeeId = account.EmployeeId;
 
-                // Check if this employee is assigned to the device
                 var isOwner = await _context.DeviceEmployees
                     .AnyAsync(de => de.DeviceId == id && de.EmployeeId == employeeId);
 
@@ -167,8 +163,8 @@ public class DevicesController : ControllerBase
                     return Forbid();
             }
 
-            var deviceType = await _context.DeviceTypes.FirstOrDefaultAsync(dt => dt.Name == dto.DeviceTypeName);
-            if (deviceType == null) return BadRequest("Invalid device type name.");
+            var deviceType = await _context.DeviceTypes.FirstOrDefaultAsync(dt => dt.Id == dto.TypeId);
+            if (deviceType == null) return BadRequest("Invalid device type id.");
 
             device.Name = dto.Name;
             device.DeviceTypeId = deviceType.Id;
@@ -180,6 +176,7 @@ public class DevicesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error updating device");
             return StatusCode(500, ex.Message);
         }
     }
@@ -200,6 +197,22 @@ public class DevicesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error deleting device");
+            return StatusCode(500, ex.Message);
+        }
+    }
+    
+    [HttpGet("types")]
+    public async Task<IActionResult> GetDeviceTypes()
+    {
+        try
+        {
+            var types = await _context.DeviceTypes.Select(dt => new { dt.Id, dt.Name }).ToListAsync();
+            return Ok(types);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching device types");
             return StatusCode(500, ex.Message);
         }
     }

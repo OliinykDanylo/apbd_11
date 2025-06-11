@@ -11,9 +11,11 @@ namespace DeviceHubUpd.Controllers;
 public class AccountsController : ControllerBase
 {
     private readonly IAccountService _accountService;
+    private readonly ILogger<AccountsController> _logger;
 
-    public AccountsController(IAccountService accountService)
+    public AccountsController(IAccountService accountService, ILogger<AccountsController> logger)
     {
+        _logger = logger;
         _accountService = accountService;
     }
     
@@ -30,6 +32,7 @@ public class AccountsController : ControllerBase
         }
         catch (Exception e)
         {
+            _logger.LogError(e, "Error registering account");
             return StatusCode(500, e.Message);
         }
     }
@@ -51,6 +54,7 @@ public class AccountsController : ControllerBase
         }
         catch (Exception e)
         {
+            _logger.LogError(e, "Error updating account");
             return StatusCode(500, e.Message);
         }
         
@@ -70,6 +74,7 @@ public class AccountsController : ControllerBase
         }
         catch (Exception e)
         {
+            _logger.LogError(e, "Error deleting account");
             return StatusCode(500, e.Message);
         }
         
@@ -91,6 +96,7 @@ public class AccountsController : ControllerBase
         }
         catch (Exception e)
         {
+            _logger.LogError(e, "Error retrieving accounts");
             return StatusCode(500, e.Message);
         }
     }
@@ -106,11 +112,13 @@ public class AccountsController : ControllerBase
 
             return Ok(new
             {
-                account.UserName
+                account.UserName,
+                account.Role
             });
         }
         catch (Exception e)
         {
+            _logger.LogError(e, "Error retrieving account");
             return StatusCode(500, e.Message);       
         }
     }

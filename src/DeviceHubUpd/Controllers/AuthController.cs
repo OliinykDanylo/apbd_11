@@ -10,9 +10,11 @@ public class AuthController : ControllerBase
 {
     private readonly IAccountService _accountService;
     private readonly IAuthService _authService;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAccountService accountService, IAuthService authService)
+    public AuthController(IAccountService accountService, IAuthService authService, ILogger<AuthController> logger)
     {
+        _logger = logger;   
         _accountService = accountService;
         _authService = authService;
     }
@@ -31,6 +33,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An error occurred during authentication.");
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }

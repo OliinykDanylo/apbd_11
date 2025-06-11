@@ -1,5 +1,6 @@
 using System.Text;
 using DeviceHubUpd.DAL;
+using DeviceHubUpd.Middleware;
 using DeviceHubUpd.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -69,7 +70,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
+app.UseMiddleware<AdditionalPropertiesValidationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
