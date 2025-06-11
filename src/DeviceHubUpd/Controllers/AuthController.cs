@@ -20,11 +20,18 @@ public class AuthController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Authenticate([FromBody] LoginRequest request)
     {
-        var account = await _accountService.Authenticate(request.UserName, request.Password);
-        if (account == null)
-            return Unauthorized("Invalid credentials.");
+        try
+        {
+            var account = await _accountService.Authenticate(request.UserName, request.Password);
+            if (account == null)
+                return Unauthorized("Invalid credentials.");
 
-        var token = _authService.GenerateJwtToken(account);
-        return Ok(new { token });
+            var token = _authService.GenerateJwtToken(account);
+            return Ok(new { token });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 }

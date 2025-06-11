@@ -20,61 +20,98 @@ public class AccountsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Register([FromBody] RegisterAccountRequest request)
     {
-        if (await _accountService.UsernameExists(request.UserName))
-            return BadRequest("Username already taken.");
+        try
+        {
+            if (await _accountService.UsernameExists(request.UserName))
+                return BadRequest("Username already taken.");
 
-        var account = await _accountService.RegisterAccount(request);
-        return Ok(new { message = "Account created.", accountId = account.Id });
+            var account = await _accountService.RegisterAccount(request);
+            return Ok(new { message = "Account created.", accountId = account.Id });
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
     }
     
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAccount(int id, [FromBody] RegisterAccountRequest request)
     {
-        var existingAccount = await _accountService.GetAccountById(id);
-        if (existingAccount == null)
-            return NotFound("Account not found.");
+        try
+        {
+            var existingAccount = await _accountService.GetAccountById(id);
+            if (existingAccount == null)
+                return NotFound("Account not found.");
 
-        existingAccount.UserName = request.UserName;
-        existingAccount.Password = request.Password;
+            existingAccount.UserName = request.UserName;
+            existingAccount.Password = request.Password;
 
-        await _accountService.UpdateAccount(existingAccount);
-        return Ok(new { message = "Account updated." });
+            await _accountService.UpdateAccount(existingAccount);
+            return Ok(new { message = "Account updated." });
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+        
     }
     
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAccount(int id)
     {
-        var existingAccount = await _accountService.GetAccountById(id);
-        if (existingAccount == null)
-            return NotFound("Account not found.");
+        try
+        {
+            var existingAccount = await _accountService.GetAccountById(id);
+            if (existingAccount == null)
+                return NotFound("Account not found.");
 
-        await _accountService.DeleteAccount(id);
-        return Ok(new { message = "Account deleted." });
+            await _accountService.DeleteAccount(id);
+            return Ok(new { message = "Account deleted." });
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+        
     }
     
     [HttpGet]
     public async Task<IActionResult> GetAllAccounts()
     {
-        var accounts = await _accountService.GetAllAccounts();
-        var result = accounts.Select(a => new
+        try
         {
-            a.Id,
-            a.UserName
-        });
+            var accounts = await _accountService.GetAllAccounts();
+            var result = accounts.Select(a => new
+            {
+                a.Id,
+                a.UserName
+            });
 
-        return Ok(result);
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
     }
     
     [HttpGet("{id}")]
     public async Task<IActionResult> GetAccount(int id)
     {
-        var account = await _accountService.GetAccountById(id);
-        if (account == null)
-            return NotFound();
-
-        return Ok(new
+        try
         {
-            account.UserName
-        });
+            var account = await _accountService.GetAccountById(id);
+            if (account == null)
+                return NotFound();
+
+            return Ok(new
+            {
+                account.UserName
+            });
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);       
+        }
     }
 }

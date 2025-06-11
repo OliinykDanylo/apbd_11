@@ -21,48 +21,62 @@ public class EmployeesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetEmployees()
     {
-        var employees = await _context.Employees
-            .Include(e => e.Person)
-            .Select(e => new
-            {
-                e.Id,
-                FullName = $"{e.Person.FirstName} {e.Person.MiddleName} {e.Person.LastName}"
-            })
-            .ToListAsync();
+        try
+        {
+            var employees = await _context.Employees
+                .Include(e => e.Person)
+                .Select(e => new
+                {
+                    e.Id,
+                    FullName = $"{e.Person.FirstName} {e.Person.MiddleName} {e.Person.LastName}"
+                })
+                .ToListAsync();
 
-        return Ok(employees);
+            return Ok(employees);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 
     [Authorize(Roles = "Admin")]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetEmployee(int id)
     {
-        var employee = await _context.Employees
-            .Include(e => e.Person)
-            .Include(e => e.Position)
-            .FirstOrDefaultAsync(e => e.Id == id);
-
-        if (employee == null) return NotFound();
-
-        return Ok(new
+        try
         {
-            Person = new
+            var employee = await _context.Employees
+                .Include(e => e.Person)
+                .Include(e => e.Position)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (employee == null) return NotFound();
+
+            return Ok(new
             {
-                employee.Person.Id,
-                employee.Person.PassportNumber,
-                employee.Person.FirstName,
-                employee.Person.MiddleName,
-                employee.Person.LastName,
-                employee.Person.PhoneNumber,
-                employee.Person.Email
-            },
-            employee.Salary,
-            employee.HireDate,
-            Position = new
-            {
-                employee.Position.Id,
-                employee.Position.Name
-            }
-        });
+                Person = new
+                {
+                    employee.Person.Id,
+                    employee.Person.PassportNumber,
+                    employee.Person.FirstName,
+                    employee.Person.MiddleName,
+                    employee.Person.LastName,
+                    employee.Person.PhoneNumber,
+                    employee.Person.Email
+                },
+                employee.Salary,
+                employee.HireDate,
+                Position = new
+                {
+                    employee.Position.Id,
+                    employee.Position.Name
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 }
